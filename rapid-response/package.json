@@ -1,0 +1,21 @@
+{
+    "name": "rapid-response",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev:api": "nx serve api",
+        "dev:web": "nx serve web",
+        "dev:worker": "nx serve worker",
+        "build": "nx run-many -t build",
+        "lint": "nx affected --target=lint",
+        "test": "nx affected --target=test"
+    },
+    "devDependencies": {
+        "@nrwl/cli": "latest",
+        "@nrwl/workspace": "latest",
+        "@nrwl/node": "latest",
+        "@nrwl/next": "latest",
+        "typescript": "~5.3.3",
+        "nx": "latest"
+    }
+}

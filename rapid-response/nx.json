@@ -1,0 +1,19 @@
+{
+    "npmScope": "rapid-response",
+    "affected": {
+        "defaultBase": "main"
+    },
+    "implicitDependencies": {
+        "package.json": "*",
+        "tsconfig.base.json": "*",
+        "README.md": "*"
+    },
+    "projects": {
+        "api": { "tags": [] },
+        "worker": { "tags": [] },
+        "web": { "tags": [] },
+        "contracts": { "tags": [] },
+        "db": { "tags": [] },
+        "ui": { "tags": [] }
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/apps/web",
+    "rootDir": ".",
+    "jsx": "preserve",
+    "module": "esnext",
+    "target": "es6",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@rapid-response/contracts": ["../../libs/contracts/src"],
+      "@rapid-response/ui": ["../../libs/ui/src"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

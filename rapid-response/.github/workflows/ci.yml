@@ -1,0 +1,83 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (root)
+        run: npm ci
+
+      - name: Build all apps
+        run: npm run build
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+
+      - name: Build & push API image
+        env:
+          IMAGE_NAME: ${{ env.ECR_REGISTRY }}/api:${{ github.sha }}
+        run: |
+          docker build -f apps/api/Dockerfile -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+
+      - name: Build & push Worker image
+        env:
+          IMAGE_NAME: ${{ env.ECR_REGISTRY }}/worker:${{ github.sha }}
+        run: |
+          docker build -f apps/worker/Dockerfile -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+
+      - name: Build & push Web image
+        env:
+          IMAGE_NAME: ${{ env.ECR_REGISTRY }}/web:${{ github.sha }}
+        run: |
+          docker build -f apps/web/Dockerfile -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+
+      # ---- Deploy to ECS (Fargate) ----
+      - name: Deploy API Service
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service \
+            --cluster rapid-response-cluster \
+            --service api-service \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Deploy Worker Service
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service \
+            --cluster rapid-response-cluster \
+            --service worker-service \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Deploy Web Service
+        if: github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service \
+            --cluster rapid-response-cluster \
+            --service web-service \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
